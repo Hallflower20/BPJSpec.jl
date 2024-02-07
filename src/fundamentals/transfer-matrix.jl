@@ -103,7 +103,7 @@ function compute_baseline_group_one_frequency!(matrix, subordinates, metadata,
     mmax = lmax
     ν = metadata.frequencies[β]
     phase_center = metadata.phase_center
-    beam_map = create_beam_map(beam, metadata, (lmax+1, 2mmax+1))
+    beam_map = create_beam_map(beam, ν, metadata, (lmax+1, 2mmax+1))
     rhat = unit_vectors(beam_map)
     plan = FastTransformsWrapper.plan_sht(lmax, mmax, size(rhat))
 
@@ -111,15 +111,15 @@ function compute_baseline_group_one_frequency!(matrix, subordinates, metadata,
     blocks = [zeros(Complex128, two(m)*length(baselines), lmax-m+1) for m = 0:mmax]
 
     function just_do_it(α)
-        real_coeff, imag_coeff = fringe_pattern(baselines[α], phase_center, beam_map, rhat, plan, ν)
+        coeff = fringe_pattern(baselines[α], phase_center, beam_map, rhat, plan, ν)
     end
 
     @sync for subordinate in subordinates
         @async while length(queue) > 0
             α = pop!(queue)
-            real_coeff, imag_coeff = remotecall_fetch(just_do_it, pool, α)
-            fix_scaling!(real_coeff, imag_coeff, ν)
-            write_to_blocks!(blocks, real_coeff, imag_coeff, lmax, mmax, α)
+            coeff = remotecall_fetch(just_do_it, pool, α)
+            fix_scaling!(coeff, ν)
+            write_to_blocks!(blocks, coeff, lmax, mmax, α)
         end
     end
 
@@ -129,22 +129,21 @@ function compute_baseline_group_one_frequency!(matrix, subordinates, metadata,
     blocks
 end
 
-function fix_scaling!(real_coeff, imag_coeff, ν)
+function fix_scaling!(coeff, ν)
     # Our m-modes are in units of Jy, but our alm are in units of K. Here we apply the scaling
     # factor to the transfer matrix that makes this work with the right units.
 
     # This is the conversion factor I have been using to convert my alm into units of K. We'll apply
     # the inverse here to the transfer matrix so that this conversion factor is no longer necessary.
     factor = ustrip(uconvert(u"K", u"Jy * c^2/(2*k)"/ν^2))
-    real_coeff.matrix ./= factor
-    imag_coeff.matrix ./= factor
+    coeff.matrix ./= factor
 end
 
-function write_to_blocks!(blocks, real_coeff, imag_coeff, lmax, mmax, α)
+function write_to_blocks!(blocks, coeff, lmax, mmax, α)
     # m = 0
     block = blocks[1]
     for l = 0:lmax
-        block[α, l+1] = conj(real_coeff[l, 0]) + 1im*conj(imag_coeff[l, 0])
+        block[α, l+1] = coeff[l, 0]
     end
     # m > 0
     for m = 1:mmax
@@ -152,8 +151,8 @@ function write_to_blocks!(blocks, real_coeff, imag_coeff, lmax, mmax, α)
         α1 = 2α-1 # positive m
         α2 = 2α-0 # negative m
         for l = m:lmax
-            block[α1, l-m+1] = conj(real_coeff[l, m]) + 1im*conj(imag_coeff[l, m])
-            block[α2, l-m+1] = conj(real_coeff[l, m]) - 1im*conj(imag_coeff[l, m])
+            block[α1, l-m+1] = coeff[l, m]
+            block[α2, l-m+1] = conj(coeff[l, m])
         end
     end
 end
@@ -161,23 +160,20 @@ end
 "Compute the spherical harmonic transform of the fringe pattern for the given baseline."
 function fringe_pattern(baseline, phase_center, beam_map, rhat, plan, ν)
     λ = u"c" / ν
-    real_fringe, imag_fringe = plane_wave(rhat, baseline, phase_center, λ)
-    real_coeff = plan * FastTransformsWrapper.Map(real_fringe .* beam_map)
-    imag_coeff = plan * FastTransformsWrapper.Map(imag_fringe .* beam_map)
-    real_coeff, imag_coeff
+    fringe = plane_wave(rhat, baseline, phase_center, λ)
+    coeff = plan * FastTransformsWrapper.Map(fringe .* beam_map)
+    coeff
 end
 
 function plane_wave(rhat, baseline, phase_center, λ)
-    real_part = similar(rhat, Float64)
-    imag_part = similar(rhat, Float64)
+    part = similar(rhat, Complex128)
     two_π = 2π
     δϕ = two_π*dot(phase_center, baseline)/λ
     for idx in eachindex(rhat)
         ϕ = uconvert(u"rad", two_π*dot(rhat[idx], baseline)/λ - δϕ)
-        real_part[idx] = cos(ϕ)
-        imag_part[idx] = sin(ϕ)
+        part[idx] = cos(ϕ) + sin(ϕ) * 1im
     end
-    FastTransformsWrapper.Map(real_part), FastTransformsWrapper.Map(imag_part)
+    FastTransformsWrapper.Map(part)
 end
 
 "Compute the unit vector to each point on the sky."
@@ -190,7 +186,7 @@ function unit_vectors(map)
 end
 
 "Create an image of the beam model."
-function create_beam_map(f, metadata, size)
+function create_beam_map(f, ν, metadata, size)
     zenith = Direction(metadata.position)
     north  = gram_schmidt(Direction(dir"ITRF", 0, 0, 1), zenith)
     east   = cross(north, zenith)
@@ -203,7 +199,7 @@ function create_beam_map(f, metadata, size)
         z = dot(vec, zenith)
         elevation = asin(clamp(z, -1, 1))
         azimuth   = atan2(x, y)
-        map[idx, jdx] = f(azimuth, elevation)
+        map[idx, jdx] = f(ν, azimuth, elevation)
     end
     map
 end
