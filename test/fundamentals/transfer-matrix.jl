@@ -52,19 +52,19 @@ const simple_beam_solid_angle = π
         # the amplitude of the plane wave should be unity everywhere
         map  = BPJSpec.create_beam_map(simple_beam, metadata, (2, 4))
         rhat = BPJSpec.unit_vectors(map)
-        real_fringe, imag_fringe = BPJSpec.plane_wave(rhat, metadata.baselines[2],
+        fringe = BPJSpec.plane_wave(rhat, metadata.baselines[2],
                                                       metadata.phase_center,
                                                       u"c" / metadata.frequencies[1])
         for jdx = 1:size(map, 2), idx = 1:size(map, 1)
-            @test hypot(real_fringe[idx, jdx], imag_fringe[idx, jdx]) ≈ 1
+            @test abs(fringe[idx, jdx]) ≈ 1
         end
 
         # if we put the phase center exactly on a pixel, that pixel should have zero imaginary
         # component
-        real_fringe, imag_fringe = BPJSpec.plane_wave(rhat, metadata.baselines[2], rhat[1, 1],
+        fringe = BPJSpec.plane_wave(rhat, metadata.baselines[2], rhat[1, 1],
                                                       u"c" / metadata.frequencies[1])
-        @test real_fringe[1, 1] == 1
-        @test imag_fringe[1, 1] == 0
+        @test real(fringe[1, 1]) == 1
+        @test imag(fringe[1, 1]) == 0
     end
 
     @testset "uniform sky / auto-correlations" begin
