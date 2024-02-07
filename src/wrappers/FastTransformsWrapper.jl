@@ -75,7 +75,11 @@ function Base.setindex!(alm::Alm, value, l, m)
     end
 end
 
-struct Map <: AbstractMatrix{Complex128}
+struct Map <: AbstractMatrix{Float64}
+    matrix :: Matrix{Float64}
+end
+
+struct Map_Complex <: AbstractMatrix{Complex128}
     matrix :: Matrix{Complex128}
 end
 

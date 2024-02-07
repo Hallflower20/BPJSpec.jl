@@ -161,7 +161,7 @@ end
 function fringe_pattern(baseline, phase_center, beam_map, rhat, plan, ν)
     λ = u"c" / ν
     fringe = plane_wave(rhat, baseline, phase_center, λ)
-    coeff = plan * FastTransformsWrapper.Map(fringe .* beam_map)
+    coeff = plan * FastTransformsWrapper.Map_Complex(fringe .* beam_map)
     coeff
 end
 
@@ -173,7 +173,7 @@ function plane_wave(rhat, baseline, phase_center, λ)
         ϕ = uconvert(u"rad", two_π*dot(rhat[idx], baseline)/λ - δϕ)
         part[idx] = cos(ϕ) + sin(ϕ) * 1im
     end
-    FastTransformsWrapper.Map(part)
+    FastTransformsWrapper.Map_Complex(part)
 end
 
 "Compute the unit vector to each point on the sky."
@@ -191,7 +191,7 @@ function create_beam_map(f, ν, metadata, size)
     north  = gram_schmidt(Direction(dir"ITRF", 0, 0, 1), zenith)
     east   = cross(north, zenith)
 
-    map = FastTransformsWrapper.Map(zeros(size))
+    map = FastTransformsWrapper.Map_Complex(zeros(size))
     for jdx = 1:size[2], idx = 1:size[1]
         vec = FastTransformsWrapper.index2vector(map, idx, jdx)
         x = dot(vec, east)
