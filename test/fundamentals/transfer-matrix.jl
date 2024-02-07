@@ -3,7 +3,7 @@ function constant_beam(azimuth, elevation)
 end
 const constant_beam_solid_angle = 4π
 
-function simple_beam(azimuth, elevation)
+function simple_beam(frequency, azimuth, elevation)
     if elevation > 0
         return sin(elevation)
     else
