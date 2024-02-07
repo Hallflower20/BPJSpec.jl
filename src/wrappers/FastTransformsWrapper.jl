@@ -87,6 +87,10 @@ Base.getindex(map::Map, idx...) = map.matrix[idx...]
 Base.setindex!(map::Map, value, idx...) = map.matrix[idx...] = value
 Base.size(map::Map) = size(map.matrix)
 
+Base.getindex(map::Map_Complex, idx...) = map.matrix[idx...]
+Base.setindex!(map::Map_Complex, value, idx...) = map.matrix[idx...] = value
+Base.size(map::Map_Complex) = size(map.matrix)
+
 function alm2map(sht, alm)
     # convert to bivariate Fourier series
     fourier = sht.sph2fourier_plan*alm.matrix
@@ -120,6 +124,17 @@ Base.:*(sht::SHT, map::Map) = map2alm(sht, map)
 Base.:\(sht::SHT, alm::Alm) = alm2map(sht, alm)
 
 function index2vector(map::Map, idx, jdx)
+    n, m = size(map)
+    θ = π*(idx-0.5)/n
+    ϕ = π - 2π*(jdx-1)/m
+    s = sin(θ)
+    x = s*cos(ϕ)
+    y = s*sin(ϕ)
+    z = cos(θ)
+    Direction(dir"ITRF", x, y, z)
+end
+
+function index2vector(map::Map_Complex, idx, jdx)
     n, m = size(map)
     θ = π*(idx-0.5)/n
     ϕ = π - 2π*(jdx-1)/m
