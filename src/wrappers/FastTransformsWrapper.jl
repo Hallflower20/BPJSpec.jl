@@ -108,7 +108,7 @@ function Base.setindex!(alm::Alm_Complex, value, l, m)
     idx = l - m + 1
     jdx = 2m + 1
     if m == 0
-        alm.matrix[idx, jdx] = value
+        alm.matrix[idx, jdx] = real(value)
         return value
     else
         sqrt2 = √2
