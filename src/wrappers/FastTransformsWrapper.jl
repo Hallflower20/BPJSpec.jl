@@ -87,7 +87,7 @@ function Base.getindex(alm::Alm_Complex, l, m)
     if m == 0
         return alm.matrix[idx, jdx]
     else
-        return (alm.matrix[idx, jdx] + alm.matrix[idx, jdx-1]) / √2
+        return (alm.matrix[idx, jdx] + alm.matrix[idx, jdx-1] * 1im) / √2
     end
 end
 
