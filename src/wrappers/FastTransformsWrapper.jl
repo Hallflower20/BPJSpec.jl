@@ -49,7 +49,7 @@ end
 struct Alm_Complex
     lmax :: Int
     mmax :: Int
-    matrix :: Matrix{Float64}
+    matrix :: Matrix{Complex128}
 end
 
 function Alm(lmax, mmax)
@@ -143,6 +143,7 @@ function map2alm_complex(sht, map)
 end
 
 Base.:*(sht::SHT, map::Map_Complex) = map2alm_complex(sht, map)
+Base.:\(sht::SHT, alm::Alm_Complex) = alm2map(sht, alm)
 
 Base.:*(sht::SHT, map::Map) = map2alm(sht, map)
 Base.:\(sht::SHT, alm::Alm) = alm2map(sht, alm)
