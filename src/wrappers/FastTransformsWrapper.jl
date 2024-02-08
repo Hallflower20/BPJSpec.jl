@@ -16,6 +16,7 @@
 module FastTransformsWrapper
 
 using FastTransforms
+using LinearAlgebra
 using CasaCore.Measures
 
 struct SHT
@@ -160,7 +161,7 @@ function map2alm_complex(sht, map)
     cut_fourier = fourier
 
     # convert to spherical harmonic coefficients
-    output = A_mul_B!(zero(cut_fourier), inv(sht.sph2fourier_plan), cut_fourier)
+    output = LinearAlgebra.ldiv!(sht.sph2fourier_plan, cut_fourier)
     Alm_Complex(sht.lmax, sht.mmax, output)
 end
 
