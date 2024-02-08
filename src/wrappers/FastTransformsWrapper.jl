@@ -160,9 +160,7 @@ function map2alm_complex(sht, map)
     cut_fourier = fourier
 
     # convert to spherical harmonic coefficients
-    output_real = sht.sph2fourier_plan \ real(cut_fourier)
-    output_imag = sht.sph2fourier_plan \ imag(cut_fourier)
-    output = output_real + output_imag * 1im
+    output = A_ldiv_B!(zero(cut_fourier), sht.sph2fourier_plan, cut_fourier)
     Alm_Complex(sht.lmax, sht.mmax, output)
 end
 
