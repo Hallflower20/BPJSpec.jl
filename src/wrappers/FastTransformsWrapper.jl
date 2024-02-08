@@ -149,6 +149,21 @@ function alm2map(sht, alm)
     Map(output)
 end
 
+function alm2map_complex(sht, alm)
+    # convert to bivariate Fourier series
+    fourier = sht.sph2fourier_plan*alm.matrix
+
+    # pad the Fourier series to the desired map size
+    #padded_fourier = zeros(eltype(fourier), sht.size)
+    #padded_fourier[1:sht.lmax+1, 1:2sht.mmax+1] = fourier
+    padded_fourier = fourier
+
+    # synthesize the map
+    synthesis_plan = FastTransforms.plan_synthesis(padded_fourier)
+    output = A_mul_B!(zero(padded_fourier), synthesis_plan, padded_fourier)
+    Map_Complex(output)
+end
+
 function map2alm(sht, map)
     # analyze the map
     analysis_plan = FastTransforms.plan_analysis(map.matrix)
@@ -178,7 +193,7 @@ function map2alm_complex(sht, map)
 end
 
 Base.:*(sht::SHT, map::Map_Complex) = map2alm_complex(sht, map)
-Base.:\(sht::SHT, alm::Alm_Complex) = alm2map(sht, alm)
+Base.:\(sht::SHT, alm::Alm_Complex) = alm2map_complex(sht, alm)
 
 Base.:*(sht::SHT, map::Map) = map2alm(sht, map)
 Base.:\(sht::SHT, alm::Alm) = alm2map(sht, alm)
