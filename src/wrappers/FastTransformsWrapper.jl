@@ -161,7 +161,7 @@ function map2alm_complex(sht, map)
     cut_fourier = fourier
 
     # convert to spherical harmonic coefficients
-    output = LinearAlgebra.ldiv!(sht.sph2fourier_plan, cut_fourier)
+    output = LinearAlgebra.ldiv!(zero(map.cut_fourier), sht.sph2fourier_plan, cut_fourier)
     Alm_Complex(sht.lmax, sht.mmax, output)
 end
 
