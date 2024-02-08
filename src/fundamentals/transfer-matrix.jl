@@ -105,7 +105,7 @@ function compute_baseline_group_one_frequency!(matrix, subordinates, metadata,
     phase_center = metadata.phase_center
     beam_map = create_beam_map(beam, ν, metadata, (lmax+1, 2mmax+1))
     rhat = unit_vectors(beam_map)
-    plan = FastTransformsWrapper.plan_sht(lmax, mmax, size(rhat))
+    plan = FastTransformsWrapper.plan_sht_complex(lmax, mmax, size(rhat))
 
     queue  = collect(1:length(baselines))
     blocks = [zeros(Complex128, two(m)*length(baselines), lmax-m+1) for m = 0:mmax]

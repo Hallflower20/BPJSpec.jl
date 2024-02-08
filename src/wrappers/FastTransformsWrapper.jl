@@ -36,8 +36,21 @@ function plan_sht(lmax, mmax, size)
     SHT(sph2fourier_plan, lmax, mmax, size)
 end
 
+function plan_sht_complex(lmax, mmax, size)
+    alm = zeros(Complex128, lmax+1, 2mmax+1)
+    map = zeros(Complex128, size)
+    sph2fourier_plan = plan_sph2fourier(alm, sketch=:none)
+    #synthesis_plan = FastTransforms.plan_synthesis(map)
+    #analysis_plan = FastTransforms.plan_analysis(map)
+    SHT(sph2fourier_plan, lmax, mmax, size)
+end
+
 function plan_sht(metadata, size)
     plan_sht(sphericalharmonics.lmax, sphericalharmonics.mmax, size)
+end
+
+function plan_sht_complex(metadata, size)
+    plan_sht_complex(sphericalharmonics.lmax, sphericalharmonics.mmax, size)
 end
 
 struct Alm
