@@ -81,6 +81,30 @@ function Base.setindex!(alm::Alm, value, l, m)
     end
 end
 
+function Base.getindex(alm::Alm_Complex, l, m)
+    idx = l - m + 1
+    jdx = 2m + 1
+    if m == 0
+        return complex(alm.matrix[idx, jdx])
+    else
+        return complex(alm.matrix[idx, jdx], alm.matrix[idx, jdx-1]) / √2
+    end
+end
+
+function Base.setindex!(alm::Alm_Complex, value, l, m)
+    idx = l - m + 1
+    jdx = 2m + 1
+    if m == 0
+        alm.matrix[idx, jdx] = real(value)
+        return complex(real(value))
+    else
+        sqrt2 = √2
+        alm.matrix[idx, jdx]   = real(value) * sqrt2
+        alm.matrix[idx, jdx-1] = imag(value) * sqrt2
+        return value
+    end
+end
+
 struct Map <: AbstractMatrix{Float64}
     matrix :: Matrix{Float64}
 end
