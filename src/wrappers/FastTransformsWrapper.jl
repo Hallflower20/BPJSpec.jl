@@ -46,6 +46,12 @@ struct Alm
     matrix :: Matrix{Float64}
 end
 
+struct Alm_Complex
+    lmax :: Int
+    mmax :: Int
+    matrix :: Matrix{Float64}
+end
+
 function Alm(lmax, mmax)
     matrix = zeros(lmax+1, 2mmax+1)
     Alm(lmax, mmax, matrix)
@@ -116,13 +122,27 @@ function map2alm(sht, map)
     cut_fourier = fourier
 
     # convert to spherical harmonic coefficients
-    output_real = sht.sph2fourier_plan \ real(cut_fourier)
-    output_imag = sht.sph2fourier_plan \ imag(cut_fourier)
-    output = output_real + output_imag * 1im
+    output = sht.sph2fourier_plan\cut_fourier
     Alm(sht.lmax, sht.mmax, output)
 end
 
-Base.:*(sht::SHT, map::Map_Complex) = map2alm(sht, map)
+function map2alm_complex(sht, map)
+    # analyze the map
+    analysis_plan = FastTransforms.plan_analysis(map.matrix)
+    fourier = A_mul_B!(zero(map.matrix), analysis_plan, map.matrix)
+
+    # cut the Fourier series down to the right size (for the desired lmax, mmax)
+    #cut_fourier = fourier[1:sht.lmax+1, 1:2sht.mmax+1]
+    cut_fourier = fourier
+
+    # convert to spherical harmonic coefficients
+    output_real = sht.sph2fourier_plan \ real(cut_fourier)
+    output_imag = sht.sph2fourier_plan \ imag(cut_fourier)
+    output = output_real + output_imag * 1im
+    Alm_Complex(sht.lmax, sht.mmax, output)
+end
+
+Base.:*(sht::SHT, map::Map_Complex) = map2alm_complex(sht, map)
 
 Base.:*(sht::SHT, map::Map) = map2alm(sht, map)
 Base.:\(sht::SHT, alm::Alm) = alm2map(sht, alm)
