@@ -120,6 +120,8 @@ function map2alm(sht, map)
     Alm(sht.lmax, sht.mmax, output)
 end
 
+Base.:*(sht::SHT, map::Map_Complex) = map2alm(sht, map)
+
 Base.:*(sht::SHT, map::Map) = map2alm(sht, map)
 Base.:\(sht::SHT, alm::Alm) = alm2map(sht, alm)
 
