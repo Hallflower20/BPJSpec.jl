@@ -199,7 +199,7 @@ function create_beam_map(f, ν, metadata, size)
         z = dot(vec, zenith)
         elevation = asin(clamp(z, -1, 1))
         azimuth   = atan2(x, y)
-        map[idx, jdx] = f(ν.val, azimuth, elevation)
+        map[idx, jdx] = f(ν, azimuth, elevation)
     end
     map
 end
