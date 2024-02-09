@@ -171,7 +171,7 @@ function plane_wave(rhat, baseline, phase_center, λ)
     δϕ = two_π*dot(phase_center, baseline)/λ
     for idx in eachindex(rhat)
         ϕ = uconvert(u"rad", two_π*dot(rhat[idx], baseline)/λ - δϕ)
-        part[idx] = cos(ϕ) + sin(ϕ) * 1im
+        part[idx] = complex(cos(ϕ), sin(ϕ))
     end
     FastTransformsWrapper.Map_Complex(part)
 end
@@ -191,7 +191,7 @@ function create_beam_map(f, ν, metadata, size)
     north  = gram_schmidt(Direction(dir"ITRF", 0, 0, 1), zenith)
     east   = cross(north, zenith)
 
-    map = FastTransformsWrapper.Map_Complex(zeros(size))
+    map = FastTransformsWrapper.Map_Complex(zeros(Complex128, size))
     for jdx = 1:size[2], idx = 1:size[1]
         vec = FastTransformsWrapper.index2vector(map, idx, jdx)
         x = dot(vec, east)
