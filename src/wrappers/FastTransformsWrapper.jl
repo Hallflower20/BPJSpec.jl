@@ -105,7 +105,7 @@ function Base.getindex(alm::Alm_Complex, l, m)
     if m == 0
         return alm.matrix[idx, jdx]
     else
-        return (alm.matrix[idx, jdx] + alm.matrix[idx, jdx-1] * 1im) / √2
+        return (alm.matrix[idx, jdx] + alm.matrix[idx, jdx-1]) / √2
     end
 end
 
@@ -118,7 +118,7 @@ function Base.setindex!(alm::Alm_Complex, value, l, m)
     else
         sqrt2 = √2
         alm.matrix[idx, jdx]   = real(value) * sqrt2
-        alm.matrix[idx, jdx-1] = imag(value) * sqrt2
+        alm.matrix[idx, jdx-1] = imag(value) * sqrt2 * 1im
         return value
     end
 end
