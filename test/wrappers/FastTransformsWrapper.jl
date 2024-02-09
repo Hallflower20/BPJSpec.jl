@@ -1,4 +1,4 @@
-@testset "FastTransformsWrapper.jl real" begin
+@testset "FastTransformsWrapper.jl" begin
     lmax = mmax = 5
     size = (lmax+1, 2mmax+1)
     plan = BPJSpec.FastTransformsWrapper.plan_sht(lmax, mmax, size)
@@ -9,9 +9,7 @@
     @test all(map .≈ 1/sqrt(4π))
     alm′ = plan * map
     @test alm′[0, 0] ≈ 1
-end
 
-@testset "FastTransformsWrapper.jl complex" begin
     lmax = mmax = 5
     size = (lmax+1, 2mmax+1)
     plan = BPJSpec.FastTransformsWrapper.plan_sht_complex(lmax, mmax, size)
