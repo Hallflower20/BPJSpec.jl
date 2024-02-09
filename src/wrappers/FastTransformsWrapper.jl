@@ -103,7 +103,7 @@ function Base.getindex(alm::Alm_Complex, l, m)
     idx = l - m + 1
     jdx = 2m + 1
     if m == 0
-        return alm.matrix[idx, jdx]
+        return complex(alm.matrix[idx, jdx])
     else
         return (alm.matrix[idx, jdx] + alm.matrix[idx, jdx-1]) / √2
     end
