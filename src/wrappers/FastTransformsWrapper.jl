@@ -70,6 +70,11 @@ function Alm(lmax, mmax)
     Alm(lmax, mmax, matrix)
 end
 
+function Alm_Complex(lmax, mmax)
+    matrix = zeros(Complex128, lmax+1, 2mmax+1)
+    Alm_Complex(lmax, mmax, matrix)
+end
+
 function Base.getindex(alm::Alm, l, m)
     idx = l - m + 1
     jdx = 2m + 1
