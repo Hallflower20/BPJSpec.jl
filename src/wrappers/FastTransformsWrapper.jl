@@ -114,7 +114,7 @@ function Base.setindex!(alm::Alm_Complex, value, l, m)
     jdx = m + 1
     if m == 0
         alm.matrix[idx, jdx] = real(value)
-        return value
+        return complex(real(value))
     else
         alm.matrix[idx, jdx] = value * √2
         return value
