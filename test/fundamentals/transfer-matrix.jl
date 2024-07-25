@@ -38,7 +38,7 @@ const simple_beam_solid_angle = π
     @test transfermatrix.storage.hierarchy.baselines == [[1, 2, 3, 4]]
 
     @testset "creating beam maps" begin
-        map  = BPJSpec.create_beam_map(simple_beam, metadata, (2, 4))
+        map  = BPJSpec.create_beam_map(simple_beam, 0, metadata, (2, 4))
         @test size(map) == (2, 4)
         rhat = BPJSpec.unit_vectors(map)
         for jdx = 1:size(map, 2), idx = 1:size(map, 1)
@@ -50,7 +50,7 @@ const simple_beam_solid_angle = π
 
     @testset "plane wave" begin
         # the amplitude of the plane wave should be unity everywhere
-        map  = BPJSpec.create_beam_map(simple_beam, metadata, (2, 4))
+        map  = BPJSpec.create_beam_map(simple_beam, 0, metadata, (2, 4))
         rhat = BPJSpec.unit_vectors(map)
         real_fringe, imag_fringe = BPJSpec.plane_wave(rhat, metadata.baselines[2],
                                                       metadata.phase_center,

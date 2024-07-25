@@ -103,7 +103,7 @@ function compute_baseline_group_one_frequency!(matrix, subordinates, metadata,
     mmax = lmax
     ν = metadata.frequencies[β]
     phase_center = metadata.phase_center
-    beam_map = create_beam_map(beam, metadata, (lmax+1, 2mmax+1))
+    beam_map = create_beam_map(beam, ν, metadata, (lmax+1, 2mmax+1))
     rhat = unit_vectors(beam_map)
     plan = FastTransformsWrapper.plan_sht(lmax, mmax, size(rhat))
 
@@ -190,7 +190,7 @@ function unit_vectors(map)
 end
 
 "Create an image of the beam model."
-function create_beam_map(f, metadata, size)
+function create_beam_map(f, ν, metadata, size)
     zenith = Direction(metadata.position)
     north  = gram_schmidt(Direction(dir"ITRF", 0, 0, 1), zenith)
     east   = cross(north, zenith)
@@ -203,7 +203,7 @@ function create_beam_map(f, metadata, size)
         z = dot(vec, zenith)
         elevation = asin(clamp(z, -1, 1))
         azimuth   = atan2(x, y)
-        map[idx, jdx] = f(azimuth, elevation)
+        map[idx, jdx] = f(ν, azimuth, elevation)
     end
     map
 end
